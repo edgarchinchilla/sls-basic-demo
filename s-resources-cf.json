@@ -1,0 +1,146 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "AWS CloudFormation template for this ${project} project",
+  "Resources": {
+    "IamRoleLambda": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "lambda.amazonaws.com"
+                ]
+              },
+              "Action": [
+                "sts:AssumeRole"
+              ]
+            }
+          ]
+        },
+        "Path": "/"
+      }
+    },
+    "IamPolicyLambda": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyName": "${stage}-${project}-lambda",
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": [
+                "logs:CreateLogGroup",
+                "logs:CreateLogStream",
+                "logs:PutLogEvents"
+              ],
+              "Resource": "arn:aws:logs:${region}:*:*"
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "s3:*"
+              ],
+              "Resource": "arn:aws:s3:::${project}-${stage}/*"
+            }
+          ]
+        },
+        "Roles": [
+          {
+            "Ref": "IamRoleLambda"
+          }
+        ]
+      }
+    },
+    "S3Bucket": {
+      "Type": "AWS::S3::Bucket",
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "AccessControl": "Private",
+        "BucketName": "${project}-${stage}"
+      }
+    },
+    "slsPrjIamUser": {
+      "Type": "AWS::IAM::User",
+      "Properties": {
+        "Policies": [ {
+          "PolicyName": "${project}Policy${stage}",
+          "PolicyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Action": [
+                  "execute-api:Invoke"
+                ],
+                "Effect": "Allow",
+                "Resource": "arn:aws:execute-api:us-east-1:*:*/dev/*"
+              },
+              {
+                "Action": [
+                  "s3:ListBucket",
+                  "s3:CreateBucket",
+                  "s3:PutBucketPolicy"
+                ],
+                "Resource": "arn:aws:s3:::${project}-${stage}/*",
+                "Effect": "Allow"
+              }
+            ] }
+        } ]
+      }
+    },
+    "slsPrjIamUserAccessKey": {
+      "Type": "AWS::IAM::AccessKey",
+      "Properties": {
+        "Status": "Active",
+        "UserName": {
+          "Ref": "slsPrjIamUser"
+        }
+      }
+    }
+  },
+  "Outputs": {
+    "IamRoleArnLambda": {
+      "Description": "ARN of the lambda IAM role",
+      "Value": {
+        "Fn::GetAtt": [
+          "IamRoleLambda",
+          "Arn"
+        ]
+      }
+    },
+    "S3BucketName": {
+      "Description": "Generated Bucket Name",
+      "Value": {
+        "Ref": "S3Bucket"
+      }
+    },
+    "IamUserArn": {
+      "Description": "ARN of the IAM user to use to execute the API",
+      "Value": {
+        "Fn::GetAtt": [
+          "slsPrjIamUser",
+          "Arn"
+        ]
+      }
+    },
+    "IamUserAccessKeyId": {
+      "Description": "Access key ID of the IAM user",
+      "Value": {
+        "Ref" : "slsPrjIamUserAccessKey"
+      }
+    },
+    "IamUserSecretAccessKey": {
+      "Description": "Secret access key of the IAM user",
+      "Value": {
+        "Fn::GetAtt": [
+          "slsPrjIamUserAccessKey",
+          "SecretAccessKey"
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "name": "sls-basic-demo",
+  "custom": {},
+  "plugins": [
+    "serverless-optimizer-plugin",
+    "serverless-serve"
+  ]
+}
