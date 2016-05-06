@@ -2,6 +2,14 @@
   "AWSTemplateFormatVersion": "2010-09-09",
   "Description": "AWS CloudFormation template for this ${project} project",
   "Resources": {
+    "S3Bucket": {
+      "Type": "AWS::S3::Bucket",
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "AccessControl": "Private",
+        "BucketName": "${project}-${stage}"
+      }
+    },
     "IamRoleLambda": {
       "Type": "AWS::IAM::Role",
       "Properties": {
@@ -26,6 +34,7 @@
     },
     "IamPolicyLambda": {
       "Type": "AWS::IAM::Policy",
+      "DependsOn" : "S3Bucket",
       "Properties": {
         "PolicyName": "${stage}-${project}-lambda",
         "PolicyDocument": {
@@ -54,14 +63,6 @@
             "Ref": "IamRoleLambda"
           }
         ]
-      }
-    },
-    "S3Bucket": {
-      "Type": "AWS::S3::Bucket",
-      "DeletionPolicy": "Retain",
-      "Properties": {
-        "AccessControl": "Private",
-        "BucketName": "${project}-${stage}"
       }
     },
     "slsPrjIamUser": {
