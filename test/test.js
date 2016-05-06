@@ -7,11 +7,10 @@ chai.use(chaiHttp);
 
 describe('Test APIG', function() {
     this.slow(10000);
-    it('/backupUsers', function(done) {
-        //setTimeout(done, 5000);
+    it('/hello', function(done) {
         this.timeout(0);
         chai.request('http://localhost:1465')
-            .get('/backupUsers')
+            .get('/hello')
             .end(function(err, res){
                 res.should.have.status(200);
                 assert.isObject(res.body, 'Response is an object/json');
