@@ -48,6 +48,13 @@ serverless project init -n <name-of-your-project> -s <stage> -r <region> -c true
         }
 		```
 	
+* Run the project locally (Emulate it)
+
+```bash
+cd ~/workspace/sls-basic-demo
+serverless serve start -s <stage> -r <region>
+```
+	
 * Deploy project
 
 ```bash
